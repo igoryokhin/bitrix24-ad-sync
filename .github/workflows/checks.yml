@@ -1,0 +1,44 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check PyYAML
+
+      - name: Compile Python files
+        run: python -m compileall -q ad_common.py full_sync.py delta_sync.py bot webui
+
+      - name: Parse YAML configuration
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          files = [Path("docker-compose.yml")]
+          files.extend(Path(".github").rglob("*.yml"))
+          files.extend(Path(".github").rglob("*.yaml"))
+          files.extend(Path("bot").rglob("*.yml"))
+          files.extend(Path("webui").rglob("*.yml"))
+          for path in sorted(set(files)):
+              with path.open(encoding="utf-8") as stream:
+                  yaml.safe_load(stream)
+              print(f"OK: {path}")
+          PY
