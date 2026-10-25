@@ -39,6 +39,20 @@ def oidc_callback():
     userinfo = token.get("userinfo") or {}
     username = userinfo.get("preferred_username") or userinfo.get("email") or userinfo.get("sub") or "unknown"
 
+    # The panel can trigger AD syncs and change settings. Authentication alone
+    # is not sufficient: only explicitly allowlisted OIDC users may enter.
+    allowed_users = current_app.config.get("WEB_ADMIN_USERS", set())
+    if not allowed_users or username.strip().lower() not in allowed_users:
+        record(
+            get_db(),
+            actor=username,
+            action="login",
+            target=None,
+            detail="oidc_user_not_allowlisted",
+            outcome="failure",
+        )
+        return redirect(url_for("auth.login_page", error="not_authorized"))
+
     session.clear()
     session.permanent = True
     session["user"] = {"name": username, "method": "oidc"}
