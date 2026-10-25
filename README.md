@@ -51,7 +51,7 @@ The Telegram bot is optional and is disabled unless the `telegram` Compose profi
 
 The web panel is bound to `127.0.0.1:8088` on the host by default. Put it behind a properly configured reverse proxy with HTTPS and access controls if remote access is needed. Do not expose the application directly to the internet.
 
-The panel supports OIDC/Keycloak when configured. Keep the local fallback login disabled unless you have deliberately configured and secured it. Set a strong persistent `SESSION_SECRET`; configure secure cookies when served over HTTPS.
+The panel supports OIDC/Keycloak when configured. Set `WEB_ADMIN_USERS` to a comma-separated allowlist of exact OIDC usernames/emails; login is denied if the list is empty or the user is not listed. Keep the local fallback login disabled unless you have deliberately configured and secured it. Set a strong persistent `SESSION_SECRET`; configure secure cookies when served over HTTPS.
 
 ## Scheduled jobs
 
