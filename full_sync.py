@@ -274,6 +274,16 @@ def sync_managers(conn, users, uid_to_dn, uid_to_dept_id, dept_info):
 
 # ================= Админские права =================
 def grant_admin_rights(conn, uid_to_dn, uid_to_dept_id, dept_info):
+    # Privileged group assignment is an explicit opt-in. Keep disabled by default.
+    enabled = os.getenv("ENABLE_ADMIN_GROUP_ASSIGNMENT", "false").strip().lower() in ("1", "true", "yes", "on")
+    if not enabled:
+        print("[ADMIN] Назначение привилегированной группы отключено (ENABLE_ADMIN_GROUP_ASSIGNMENT=false)")
+        return 0
+
+    if not ADMIN_GROUP_NAME:
+        print("[ADMIN] ADMIN_GROUP_NAME не задан; назначение привилегированной группы пропущено")
+        return 0
+
     conn.search(AD_BASE_DN,
                 f"(&(objectClass=group)(cn={escape_filter_chars(ADMIN_GROUP_NAME)}))",
                 search_scope=SUBTREE, attributes=['distinguishedName', 'member'])
