@@ -75,12 +75,10 @@ DISABLED_RETENTION_DAYS = int(os.getenv("DISABLED_RETENTION_DAYS", "180"))
 DEPT_GROUP_PREFIX = "DEPT_"
 
 # Ссылка на инструкцию, добавляется в конец приветственного сообщения
-INSTRUCTION_URL = os.getenv(
-    "INSTRUCTION_URL",
-    "https://bitrix24public.com/anlasvegas.bitrix24.ru/doc/bUhH4JzUOR1KmllQOQKK"
-)
-# Ссылка на инструкцию для шаблона "почта" (если не задана — просто не добавляется в сообщение)
-MAIL_INSTRUCTION_URL = os.getenv("MAIL_INSTRUCTION_URL", "")
+INSTRUCTION_URL = os.getenv("INSTRUCTION_URL", "").strip()
+# Optional links used in credential notification templates. No company-specific defaults.
+MAIL_WEB_URL = os.getenv("MAIL_WEB_URL", "").strip().rstrip("/")
+MAIL_INSTRUCTION_URL = os.getenv("MAIL_INSTRUCTION_URL", "").strip()
 
 # Путь к общей SQLite БД веб-панели. Если задан — send_b24_credentials_message
 # best-effort пишет туда строку в message_log (нужно веб-панели/боту, чтобы
@@ -361,12 +359,11 @@ def send_b24_credentials_message(
             f"Для вас обновлён пароль почтового аккаунта.\n\n"
             f"📧 Адрес почты: {mail_login}\n"
             f"🔒 Пароль: {password}\n\n"
-            f"📧 Веб-почта доступна по адресу: https://mail.arendok.ru/\n\n"
             f"Для использования на вашем компьютере или телефоне:\n"
-            f"• Outlook / Apple Mail / Thunderbird\n"
-            f"📖 Инструкция для Thunderbird: https://bitrix24public.com/anlasvegas.bitrix24.ru/doc/AIElaBkIsVuSkE2kjQdQ\n\n"
-            f"Логин и пароль совпадают с учётной записью домена."
-            + (f"\n\n📖 Дополнительная инструкция: {MAIL_INSTRUCTION_URL}" if MAIL_INSTRUCTION_URL else "")
+            f"• Outlook / Apple Mail / Thunderbird\n\n"
+            + (f"📧 Веб-почта доступна по адресу: {MAIL_WEB_URL}/\n\n" if MAIL_WEB_URL else "")
+            + (f"📖 Инструкция: {MAIL_INSTRUCTION_URL}\n\n" if MAIL_INSTRUCTION_URL else "")
+            + "Логин и пароль совпадают с учётной записью домена."
         )
     else:
         message_text = (
@@ -376,7 +373,7 @@ def send_b24_credentials_message(
             f"🔒 Пароль: {password}\n"
             f"📧 Почта: {email}\n\n"
             f"Пожалуйста, смените пароль при первом входе.\n\n"
-            f"📖 Инструкция: {INSTRUCTION_URL}"
+            f"📖 Инструкция: {INSTRUCTION_URL}" if INSTRUCTION_URL else ""
         )
 
     payload = {
