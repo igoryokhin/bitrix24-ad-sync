@@ -35,11 +35,11 @@ BITRIX_NOTIFY_WEBHOOK  = os.getenv("BITRIX_NOTIFY_WEBHOOK", "") or BITRIX_WEBHOO
 # Тестовый режим: если задан — сообщения уходят только этому UID Битрикс24
 TEST_RECIPIENT_ID      = os.getenv("TEST_RECIPIENT_ID", "").strip()
 
-AD_SERVER        = os.getenv("AD_SERVER", "192.168.88.4")
-AD_USER          = os.getenv("AD_USER", "svc-adsync@arendok.ru")
+AD_SERVER        = os.getenv("AD_SERVER", "localhost")
+AD_USER          = os.getenv("AD_USER", "")
 AD_PASSWORD      = os.getenv("AD_PASSWORD", "")
-AD_UPN_SUFFIX    = os.getenv("AD_UPN_SUFFIX", "arendok.ru")
-AD_BASE_DN       = os.getenv("AD_BASE_DN", "DC=arendok,DC=ru")
+AD_UPN_SUFFIX    = os.getenv("AD_UPN_SUFFIX", "example.org")
+AD_BASE_DN       = os.getenv("AD_BASE_DN", "DC=example,DC=org")
 
 ROOT_OU_NAME = "Bitrix24_Structure"
 ROOT_OU_DN = f"OU={ROOT_OU_NAME},{AD_BASE_DN}"
@@ -61,9 +61,9 @@ PASSWORD_LENGTH = int(os.getenv("PASSWORD_LENGTH", "14"))
 # Оставлено для обратной совместимости / ручного сброса
 DEFAULT_PASSWORD = os.getenv("DEFAULT_PASSWORD", "")
 
-COMPANY_NAME = os.getenv("COMPANY_NAME", "АрендОК")
+COMPANY_NAME = os.getenv("COMPANY_NAME", "Example Company")
 
-ADMIN_GROUP_NAME = os.getenv("ADMIN_GROUP_NAME", "Администраторы домена")
+ADMIN_GROUP_NAME = os.getenv("ADMIN_GROUP_NAME", "").strip()
 ADMIN_DEPT_KEYWORDS = [
     "департамент ит", "отдел разработки",
     "отдел технической поддержки", "спбдепартамент ит",
