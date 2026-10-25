@@ -38,11 +38,20 @@ def oidc_callback():
     token = oauth.keycloak.authorize_access_token()
     userinfo = token.get("userinfo") or {}
     username = userinfo.get("preferred_username") or userinfo.get("email") or userinfo.get("sub") or "unknown"
+    identity_candidates = {
+        str(value).strip().lower()
+        for value in (
+            userinfo.get("preferred_username"),
+            userinfo.get("email"),
+            userinfo.get("sub"),
+        )
+        if value
+    }
 
     # The panel can trigger AD syncs and change settings. Authentication alone
     # is not sufficient: only explicitly allowlisted OIDC users may enter.
     allowed_users = current_app.config.get("WEB_ADMIN_USERS", set())
-    if not allowed_users or username.strip().lower() not in allowed_users:
+    if not allowed_users or not identity_candidates.intersection(allowed_users):
         record(
             get_db(),
             actor=username,
