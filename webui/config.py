@@ -23,6 +23,7 @@ class Config:
     OIDC_ISSUER = os.getenv("OIDC_ISSUER", "").strip()
     OIDC_CLIENT_ID = os.getenv("OIDC_CLIENT_ID", "").strip()
     OIDC_CLIENT_SECRET = os.getenv("OIDC_CLIENT_SECRET", "").strip()
+    WEB_ADMIN_USERS = {x.strip().lower() for x in os.getenv("WEB_ADMIN_USERS", "").split(",") if x.strip()}
 
     ADMIN_FALLBACK_ENABLED = _bool("ADMIN_FALLBACK_ENABLED", "false")
     ADMIN_FALLBACK_USERNAME = os.getenv("ADMIN_FALLBACK_USERNAME", "").strip()
