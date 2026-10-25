@@ -115,6 +115,7 @@ services:
     image: ad-tgbot:latest
     container_name: ad-tgbot
     restart: unless-stopped
+    profiles: ["telegram"]
 
     env_file:
       - .env
@@ -139,7 +140,7 @@ services:
 
     network_mode: bridge
     extra_hosts:
-      - "ad-server:192.x.x.x"
+      - "${AD_SERVER_HOST:-ad-server}:${AD_SERVER_IP:-192.0.2.10}"
 
     logging:
       driver: json-file
