@@ -58,7 +58,7 @@ The current `crontab` runs delta syncs on a schedule and a full sync on the firs
 ## Security and operational notes
 
 - LDAPS certificate validation is on by default. If your AD uses a private CA, trust that CA; do not work around certificate errors by turning validation off.
-- Use a dedicated least-privilege AD account. Review any code that grants privileged group membership; never grant Domain Admins merely because a department name matches a keyword.
+- Use a dedicated least-privilege AD account. Privileged group assignment is disabled by default; do not enable `ENABLE_ADMIN_GROUP_ASSIGNMENT` unless you have reviewed the department keyword rules and the exact target group. Never grant Domain Admins merely because a department name matches a keyword.
 - The delta sync includes account deactivation and deletion after a configurable retention period. Validate the behavior and source-of-truth assumptions with test accounts first.
 - Store secrets in a secret manager or protected deployment environment where possible. The `.env` file is ignored by Git, but remains plaintext on disk.
 - Back up the AD and the SQLite data before upgrades. Keep logs access-controlled; they may contain account-related operational information.
