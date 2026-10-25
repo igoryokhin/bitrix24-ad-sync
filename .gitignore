@@ -1,0 +1,20 @@
+cat > .gitignore <<'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# macOS
+.DS_Store
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+env.sh
+*.pem
+*.key
+
+# Local data and logs
+*.log
+EOF
