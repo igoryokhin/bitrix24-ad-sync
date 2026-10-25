@@ -1,13 +1,35 @@
+# Never send secrets or local runtime state to the Docker build context.
+.env
+.env.*
+!.env.example
+env.sh
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime data and logs
 logs/
+webui/data/
 *.log
+*.db
+*.sqlite
+*.sqlite3
+*.dump
 *.bak
+
+# Python and local tooling
 __pycache__/
-*.pyc
+*.py[cod]
 .git/
 .gitignore
 .venv/
 venv/
 .DS_Store
-Dockerfile
-docker-compose.yml
+._*
+.idea/
+.vscode/
+
+# Project documentation is not needed in images
 *.md
