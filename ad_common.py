@@ -36,6 +36,8 @@ BITRIX_NOTIFY_WEBHOOK  = os.getenv("BITRIX_NOTIFY_WEBHOOK", "") or BITRIX_WEBHOO
 TEST_RECIPIENT_ID      = os.getenv("TEST_RECIPIENT_ID", "").strip()
 
 AD_SERVER        = os.getenv("AD_SERVER", "localhost")
+AD_TLS_VALIDATE  = os.getenv("AD_TLS_VALIDATE", "true").strip().lower() not in ("0", "false", "no", "off")
+AD_TLS_CA_CERT   = os.getenv("AD_TLS_CA_CERT", "").strip() or None
 AD_USER          = os.getenv("AD_USER", "")
 AD_PASSWORD      = os.getenv("AD_PASSWORD", "")
 AD_UPN_SUFFIX    = os.getenv("AD_UPN_SUFFIX", "example.org")
@@ -417,8 +419,11 @@ def connect_ad(exit_on_failure: bool = True):
         if exit_on_failure:
             sys.exit(1)
         raise ADConnectionError(msg)
-    tls = Tls(validate=ssl.CERT_NONE, version=ssl.PROTOCOL_TLSv1_2,
-              ciphers="DEFAULT@SECLEVEL=1")
+    # Verify the LDAPS certificate by default. For an internal CA, set AD_TLS_CA_CERT
+    # to the CA bundle path mounted inside the container. Disabling validation is unsafe.
+    tls = Tls(validate=ssl.CERT_REQUIRED if AD_TLS_VALIDATE else ssl.CERT_NONE,
+              version=ssl.PROTOCOL_TLSv1_2, ciphers="DEFAULT@SECLEVEL=1",
+              ca_certs_file=AD_TLS_CA_CERT)
     server = Server(AD_SERVER, get_info=ALL, use_ssl=True, tls=tls)
     try:
         conn = Connection(server, user=AD_USER, password=AD_PASSWORD,
