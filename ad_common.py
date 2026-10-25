@@ -372,9 +372,10 @@ def send_b24_credentials_message(
             f"🔑 Логин: {login}\n"
             f"🔒 Пароль: {password}\n"
             f"📧 Почта: {email}\n\n"
-            f"Пожалуйста, смените пароль при первом входе.\n\n"
-            f"📖 Инструкция: {INSTRUCTION_URL}" if INSTRUCTION_URL else ""
+            f"Пожалуйста, смените пароль при первом входе."
         )
+        if INSTRUCTION_URL:
+            message_text += f"\n\n📖 Инструкция: {INSTRUCTION_URL}"
 
     payload = {
         "DIALOG_ID": str(user_id),
