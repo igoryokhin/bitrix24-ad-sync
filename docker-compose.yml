@@ -37,7 +37,7 @@ services:
     # Сеть: важно для доступа к DC и Битриксу
     network_mode: bridge
     extra_hosts:
-      - "ad-server.arendok.ru:192.168.88.4"
+      - "${AD_SERVER_HOST:-ad-server}:${AD_SERVER_IP:-192.0.2.10}"
 
     logging:
       driver: json-file
@@ -93,7 +93,7 @@ services:
 
     network_mode: bridge
     extra_hosts:
-      - "ad-server:192.x.x.x"
+      - "${AD_SERVER_HOST:-ad-server}:${AD_SERVER_IP:-192.0.2.10}"
 
     logging:
       driver: json-file
