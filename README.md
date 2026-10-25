@@ -44,8 +44,10 @@ docker compose config
 docker compose build
 docker compose up -d
 docker compose ps
-docker compose logs --tail=200 ad-sync webui tgbot
+docker compose logs --tail=200 ad-sync webui
 ```
+
+The Telegram bot is optional and is disabled unless the `telegram` Compose profile is enabled. After configuring its token and administrator IDs, start it with `docker compose --profile telegram up -d tgbot` and inspect it with `docker compose logs --tail=200 tgbot`.
 
 The web panel is bound to `127.0.0.1:8088` on the host by default. Put it behind a properly configured reverse proxy with HTTPS and access controls if remote access is needed. Do not expose the application directly to the internet.
 
