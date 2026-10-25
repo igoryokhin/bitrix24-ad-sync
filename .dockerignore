@@ -1,0 +1,13 @@
+logs/
+*.log
+*.bak
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.venv/
+venv/
+.DS_Store
+Dockerfile
+docker-compose.yml
+*.md

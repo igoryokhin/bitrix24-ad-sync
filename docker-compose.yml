@@ -1,0 +1,155 @@
+services:
+  ad-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SUPERCRONIC_VERSION: v0.2.33
+        TARGETARCH: amd64
+    image: ad-sync:latest
+    container_name: ad-sync
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      # Даёт send_b24_credentials_message() best-effort записывать в общий
+      # message_log веб-панели — иначе "кто ещё не получил" в боте не видит
+      # самые первые сообщения, отправленные при создании учётки отсюда.
+      MESSAGE_LOG_DB_PATH: /app/shared-data/webui.db
+
+    volumes:
+      # Логи и маркер инициализации — сохраняются между перезапусками
+      - ./logs:/app/logs
+      # Общий с webui/tgbot SQLite — см. MESSAGE_LOG_DB_PATH выше
+      - ./webui/data:/app/shared-data
+      # --- Для быстрой итерации без пересборки (опционально) ---
+      # - ./ad_common.py:/app/ad_common.py:ro
+      # - ./full_sync.py:/app/full_sync.py:ro
+      # - ./delta_sync.py:/app/delta_sync.py:ro
+      # - ./crontab:/app/crontab:ro
+
+    # Ресурсы (compose v2 понимает эти ключи)
+    mem_limit: 256m
+    cpus: 1.0
+
+    # Сеть: важно для доступа к DC и Битриксу
+    network_mode: bridge
+    extra_hosts:
+      - "ad-server.arendok.ru:192.168.88.4"
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f supercronic >/dev/null || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  webui:
+    build:
+      context: .
+      dockerfile: webui/Dockerfile
+    image: ad-webui:latest
+    container_name: ad-webui
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      ENV_FILE_PATH: /app/.env
+      SQLITE_PATH: /app/data/webui.db
+      SYNC_LOG_DIR: /app/sync-logs
+      AD_SCRIPTS_DIR: /ad-scripts
+
+    volumes:
+      # Settings-экран правит реальный .env — rw
+      - ./.env:/app/.env
+      # SQLite: история синков, лог сообщений, аудит — переживает рестарты
+      - ./webui/data:/app/data
+      # Общий с ad-sync volume — на нём же лежит advisory-лок, чтобы
+      # запуск из панели не пересёкся с запуском из cron
+      - ./logs:/app/sync-logs
+      # Единый источник правды для sync-логики: панель запускает
+      # ТЕ ЖЕ файлы, что и ad-sync, без второй копии кода
+      - ./ad_common.py:/ad-scripts/ad_common.py:ro
+      - ./full_sync.py:/ad-scripts/full_sync.py:ro
+      - ./delta_sync.py:/ad-scripts/delta_sync.py:ro
+
+    ports:
+      # Существующий reverse proxy проксирует сюда; порт на loopback,
+      # наружу не торчит напрямую
+      - "127.0.0.1:8088:8000"
+
+    mem_limit: 320m
+    cpus: 1.0
+
+    network_mode: bridge
+    extra_hosts:
+      - "ad-server:192.x.x.x"
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8000/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  tgbot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    image: ad-tgbot:latest
+    container_name: ad-tgbot
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      ENV_FILE_PATH: /app/.env
+      SQLITE_PATH: /app/data/webui.db
+      AD_SCRIPTS_DIR: /ad-scripts
+
+    volumes:
+      # Токен/ID админов и т.д. — только на чтение, бот ничего не пишет в .env
+      - ./.env:/app/.env:ro
+      # Общий SQLite (message_log/audit_log) с webui и ad-sync
+      - ./webui/data:/app/data
+      - ./ad_common.py:/ad-scripts/ad_common.py:ro
+      # Переиспользуем уже написанную логику веб-панели без дублирования
+      - ./webui/services:/app/services:ro
+
+    # Входящего порта не нужно — только исходящий long-polling к Telegram API
+    mem_limit: 192m
+    cpus: 0.5
+
+    network_mode: bridge
+    extra_hosts:
+      - "ad-server:192.x.x.x"
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'python.*bot.py' >/dev/null || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

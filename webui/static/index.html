@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AD ↔ Bitrix24 Admin</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-title">AD ↔ Bitrix24 · Admin</div>
+    <div class="app-user">
+      <span id="user-name"></span>
+      <a href="/auth/logout" class="btn btn-small">Выйти</a>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="users">Пользователи</button>
+    <button class="tab-btn" data-tab="sync">Синхронизация</button>
+    <button class="tab-btn" data-tab="settings">Настройки</button>
+    <button class="tab-btn" data-tab="audit">Аудит</button>
+  </nav>
+
+  <main>
+    <section id="tab-dashboard" class="tab-panel active"></section>
+    <section id="tab-users" class="tab-panel"></section>
+    <section id="tab-sync" class="tab-panel"></section>
+    <section id="tab-settings" class="tab-panel"></section>
+    <section id="tab-audit" class="tab-panel"></section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
